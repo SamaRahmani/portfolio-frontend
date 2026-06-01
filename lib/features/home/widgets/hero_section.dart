@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 
 class HeroSection extends StatelessWidget {
   final VoidCallback onViewProjects;
+  final GlobalKey homeKey;
+
+ 
 
   const HeroSection({
     super.key,
     required this.onViewProjects,
+    required this.homeKey
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      // key: homeKey,
       height: 600,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 80),

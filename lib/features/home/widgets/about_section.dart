@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
 class AboutSection extends StatelessWidget {
-  const AboutSection({super.key});
+
+  final GlobalKey aboutKey;
+  const AboutSection({super.key, required this.aboutKey});
+  
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: aboutKey,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 100),
       color: Colors.white,

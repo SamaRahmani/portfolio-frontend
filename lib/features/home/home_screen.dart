@@ -15,7 +15,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   final ScrollController _scrollController = ScrollController();
 
   // 🔑 Section Keys
@@ -25,49 +24,71 @@ class _HomeScreenState extends State<HomeScreen> {
   final blogKey = GlobalKey();
   final contactKey = GlobalKey();
 
+  // 🔥 FINAL SCROLL FUNCTION
   void scrollToSection(GlobalKey key) {
+    if (!_scrollController.hasClients) return;
+
+    // ✅ HOME FIX (force scroll)
+    if (key == homeKey) {
+      _scrollController.animateTo(
+        _scrollController.position.minScrollExtent,
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeInOutCubic,
+      );
+      return;
+    }
+
     final context = key.currentContext;
     if (context != null) {
       Scrollable.ensureVisible(
         context,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeInOutCubic,
       );
     }
   }
 
-  
-
-  
-
-  // 🔷 MAIN BUILD
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
+            /// 🔝 NAVBAR
             Navbar(
-                    onNavClick: scrollToSection,
-                    homeKey: homeKey,
-                    aboutKey: aboutKey,
-                    projectsKey: projectsKey,
-                    blogKey: blogKey,
-                    contactKey: contactKey,
-                  ),
-        
+              onNavClick: scrollToSection,
+              homeKey: homeKey,
+              aboutKey: aboutKey,
+              projectsKey: projectsKey,
+              blogKey: blogKey,
+              contactKey: contactKey,
+            ),
+
+            /// 🔽 SCROLL AREA
             Expanded(
               child: SingleChildScrollView(
                 controller: _scrollController,
                 child: Column(
                   children: [
+                    /// 🔥 HOME SECTION (IMPORTANT)
                     HeroSection(
-          onViewProjects: () => scrollToSection(projectsKey),
-        ),
-                    const AboutSection(),
+                      homeKey: homeKey,
+                      onViewProjects: () =>
+                          scrollToSection(projectsKey),
+                    ),
+
+                    /// ABOUT
+                    AboutSection(aboutKey: aboutKey),
+
+                    /// PROJECTS
                     ProjectsSection(projectsKey: projectsKey),
+
+                    /// BLOG
                     BlogSection(blogKey: blogKey),
+
+                    /// CONTACT
                     ContactSection(contactKey: contactKey),
+
                     const Footer(),
                   ],
                 ),
@@ -78,5 +99,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  
 }
