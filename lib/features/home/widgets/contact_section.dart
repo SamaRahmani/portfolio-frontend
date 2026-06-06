@@ -18,10 +18,10 @@ class _ContactSectionState extends State<ContactSection> {
   final messageController = TextEditingController();
 
   final socialLinks = [
-    {"icon": Icons.work, "url": "https://www.naukri.com/yourprofile"},
-    {"icon": Icons.business, "url": "https://linkedin.com/in/yourprofile"},
-    {"icon": Icons.code, "url": "https://leetcode.com/yourprofile"},
-    {"icon": Icons.account_tree, "url": "https://github.com/yourprofile"},
+    {"icon": Icons.work, "label": "Naukri", "url": "https://www.naukri.com/yourprofile"},
+    {"icon": Icons.business, "label": "LinkedIn", "url": "https://linkedin.com/in/yourprofile"},
+    {"icon": Icons.code, "label": "LeetCode", "url": "https://leetcode.com/yourprofile"},
+    {"icon": Icons.account_tree, "label": "GitHub", "url": "https://github.com/yourprofile"},
   ];
 
   bool isLoading = false;
@@ -36,20 +36,11 @@ class _ContactSectionState extends State<ContactSection> {
       return;
     }
 
-    if (!emailController.text.contains("@")) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter valid email")),
-      );
-      return;
-    }
-
     setState(() => isLoading = true);
 
     try {
-      final url = Uri.parse("http://localhost:8080/messages");
-
       final response = await http.post(
-        url,
+        Uri.parse("http://localhost:8080/messages"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "name": nameController.text,
@@ -60,18 +51,16 @@ class _ContactSectionState extends State<ContactSection> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Message sent successfully ✅")),
+          const SnackBar(content: Text("Message sent ✅")),
         );
 
         nameController.clear();
         emailController.clear();
         messageController.clear();
-      } else {
-        throw Exception("Failed");
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Error sending message ❌")),
+        const SnackBar(content: Text("Error ❌")),
       );
     }
 
@@ -86,212 +75,184 @@ class _ContactSectionState extends State<ContactSection> {
   Widget build(BuildContext context) {
     return Container(
       key: widget.contactKey,
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 100),
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 100),
       color: Colors.grey.shade200,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// 🔥 LEFT SIDE (70%)
-          Expanded(
-            flex: 7,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// HEADING
-                Text(
-                  "Get in Touch with Sama",
-                  style: TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade900,
-                  ),
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          double width = constraints.maxWidth;
+          bool isMobile = width < 900;
 
-                const SizedBox(height: 20),
-
-                /// 🔥 PARAGRAPH (light color)
-                Text(
-                  "I'm always open to discussing new opportunities, interesting projects, or just having a chat about tech. Feel free to reach out through any platform below.",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey.shade600,
-                    height: 1.6,
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                /// DOWNLOAD CV
-                GestureDetector(
-                  onTap: () {
-                    openUrl("/assets/pdf/resume.pdf");
-                  },
-                  child: Container(
-  width: 250,
-  height: 50,
-  decoration: BoxDecoration(
-    color: Colors.black,
-    borderRadius: BorderRadius.circular(6), // ✅ now works
-  ),
-  alignment: Alignment.center,
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: const [
-      Icon(Icons.download, color: Colors.white),
-      SizedBox(width: 10),
-      Text(
-        "Download Resume",
-        style: TextStyle(color: Colors.white),
-      ),
-    ],
-  ),
-),
-                ),
-
-                const SizedBox(height: 40),
-
-                /// SOCIAL LINKS
-                Row(
-                  children: socialLinks.map((item) {
-                    String label = "";
-                    if (item["icon"] == Icons.work) label = "Naukri";
-                    if (item["icon"] == Icons.business) label = "LinkedIn";
-                    if (item["icon"] == Icons.code) label = "LeetCode";
-                    if (item["icon"] == Icons.account_tree) label = "GitHub";
-
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 25),
-                      child: socialCard(
-                        item["icon"] as IconData,
-                        label,
-                        item["url"] as String,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 80),
-
-          /// 🔥 RIGHT SIDE (30%)
-          Expanded(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("Your Name"),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    hintText: "Enter your name",
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                const Text("Your Email"),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    hintText: "Enter your email",
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                const Text("Your Message"),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: messageController,
-                  maxLines: 5,
-                  decoration: InputDecoration(
-                    hintText: "Write your message here...",
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                GestureDetector(
-                  onTap: isLoading ? null : sendMessage,
-                  child: Container(
-                    width: double.infinity,
-                    height: 55,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    alignment: Alignment.center,
-                    child: isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            "Send Message",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          return isMobile
+              ? mobileLayout()
+              : desktopLayout();
+        },
       ),
     );
   }
 
+  /// 🔥 DESKTOP
+  Widget desktopLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(flex: 6, child: leftContent()),
+        const SizedBox(width: 60),
+        Expanded(flex: 4, child: form()),
+      ],
+    );
+  }
+
+  /// 🔥 MOBILE
+  Widget mobileLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        leftContent(),
+        const SizedBox(height: 50),
+        form(),
+      ],
+    );
+  }
+
+  /// 🔥 LEFT CONTENT
+  Widget leftContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Get in Touch with Sama",
+          style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+        ),
+
+        const SizedBox(height: 20),
+
+        Text(
+          "I'm always open to discussing new opportunities, interesting projects, or just having a chat about tech.",
+          style: TextStyle(color: Colors.grey.shade700, height: 1.6),
+        ),
+
+        const SizedBox(height: 30),
+
+        /// RESUME BUTTON
+        GestureDetector(
+          onTap: () => openUrl("/assets/pdf/resume.pdf"),
+          child: Container(
+            width: 220,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            alignment: Alignment.center,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.download, color: Colors.white),
+                SizedBox(width: 10),
+                Text("Download Resume", style: TextStyle(color: Colors.white)),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 40),
+
+        /// 🔥 SOCIAL GRID
+        Wrap(
+          spacing: 20,
+          runSpacing: 20,
+          children: socialLinks.map((item) {
+            return socialCard(
+              item["icon"] as IconData,
+              item["label"] as String,
+              item["url"] as String,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  /// 🔥 FORM
+  Widget form() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        input("Your Name", nameController),
+        const SizedBox(height: 20),
+        input("Your Email", emailController),
+        const SizedBox(height: 20),
+        input("Your Message", messageController, maxLines: 5),
+        const SizedBox(height: 30),
+
+        GestureDetector(
+          onTap: isLoading ? null : sendMessage,
+          child: Container(
+            height: 55,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            alignment: Alignment.center,
+            child: isLoading
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text("Send Message",
+                    style: TextStyle(color: Colors.white)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 🔥 INPUT
+  Widget input(String label, TextEditingController controller,
+      {int maxLines = 1}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            hintText: "Enter $label",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 🔥 SOCIAL CARD
   Widget socialCard(IconData icon, String label, String url) {
     return GestureDetector(
       onTap: () => openUrl(url),
       child: Container(
-        width: 120,
-        height: 120,
-        padding: const EdgeInsets.all(12),
+        width: 110,
+        height: 110,
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Colors.black12,
-              blurRadius: 8,
-              offset: Offset(0, 4),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
             )
           ],
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 32, color: Colors.black),
-
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-
-            const Icon(Icons.open_in_new, size: 16)
+            Icon(icon, size: 30),
+            const SizedBox(height: 10),
+            Text(label),
           ],
         ),
       ),

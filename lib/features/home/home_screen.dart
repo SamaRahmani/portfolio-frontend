@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'widgets/app_drawer.dart';
 import 'widgets/navbar.dart';
 import 'widgets/hero_section.dart';
 import 'widgets/about_section.dart';
 import 'widgets/projects_section.dart';
 import 'widgets/blog_section.dart';
+import 'widgets/skills_section.dart';
 import 'widgets/contact_section.dart';
 import 'widgets/footer.dart';
+import 'widgets/timeline_section.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,40 +20,62 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
 
-  // 🔑 Section Keys
+  /// 🔑 SECTION KEYS
   final homeKey = GlobalKey();
   final aboutKey = GlobalKey();
   final projectsKey = GlobalKey();
   final blogKey = GlobalKey();
+  final skillsKey = GlobalKey();
+  final timelineKey = GlobalKey();
   final contactKey = GlobalKey();
 
-  // 🔥 FINAL SCROLL FUNCTION
+  /// 🔥 SCROLL FUNCTION (FIXED)
   void scrollToSection(GlobalKey key) {
-    if (!_scrollController.hasClients) return;
+  /// 🔥 Drawer close
+  Navigator.of(context).maybePop();
 
-    // ✅ HOME FIX (force scroll)
-    if (key == homeKey) {
-      _scrollController.animateTo(
-        _scrollController.position.minScrollExtent,
-        duration: const Duration(milliseconds: 700),
-        curve: Curves.easeInOutCubic,
-      );
-      return;
-    }
+  if (!_scrollController.hasClients) return;
 
-    final context = key.currentContext;
-    if (context != null) {
-      Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 700),
-        curve: Curves.easeInOutCubic,
-      );
-    }
+  /// HOME FIX
+  if (key == homeKey) {
+    _scrollController.jumpTo(1);
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOut,
+    );
+    return;
   }
+
+  final sectionContext = key.currentContext;
+
+  if (sectionContext != null) {
+    /// 🔥 DELAY = smooth UX
+    Future.delayed(const Duration(milliseconds: 200), () {
+      Scrollable.ensureVisible(
+        sectionContext,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      /// 📱 DRAWER (MOBILE)
+      drawer: AppDrawer(
+  onNavClick: scrollToSection,
+  homeKey: homeKey,
+  aboutKey: aboutKey,
+  projectsKey: projectsKey,
+  blogKey: blogKey,
+  skillsKey: skillsKey,
+  timelineKey: timelineKey,
+  contactKey: contactKey,
+),
+
       body: SafeArea(
         child: Column(
           children: [
@@ -61,39 +86,40 @@ class _HomeScreenState extends State<HomeScreen> {
               aboutKey: aboutKey,
               projectsKey: projectsKey,
               blogKey: blogKey,
+              skillsKey: skillsKey,
+              timelineKey: timelineKey,
               contactKey: contactKey,
             ),
 
-            /// 🔽 SCROLL AREA
+            /// 📜 SCROLLABLE CONTENT
             Expanded(
               child: SingleChildScrollView(
                 controller: _scrollController,
                 child: Column(
                   children: [
-                    /// 🔥 HOME SECTION (IMPORTANT)
                     HeroSection(
                       homeKey: homeKey,
                       onViewProjects: () =>
                           scrollToSection(projectsKey),
                     ),
 
-                    /// ABOUT
                     AboutSection(aboutKey: aboutKey),
 
-                    /// PROJECTS
                     ProjectsSection(projectsKey: projectsKey),
 
-                    /// BLOG
                     BlogSection(blogKey: blogKey),
 
-                    /// CONTACT
+                    SkillsSection(skillsKey: skillsKey),
+
+                    TimelineSection(timelineKey: timelineKey),
+
                     ContactSection(contactKey: contactKey),
 
                     const Footer(),
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
